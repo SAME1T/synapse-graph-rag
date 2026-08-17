@@ -1,0 +1,27 @@
+# --- Backend Çatısı ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+python-multipart==0.0.20
+python-dotenv==1.0.1
+
+# --- Yerel LLM (Foundry Local) — hızlı güncellendiği için minimum sürüm veriyoruz ---
+foundry-local-sdk>=1.2.4
+openai>=1.59.0
+
+# --- Vektör Depolama ve Graf ---
+chromadb>=0.6.3
+networkx==3.4.2
+
+# --- Embedding ---
+sentence-transformers>=3.3.1
+
+# --- Doküman İşleme ---
+pypdf==5.1.0
+
+# --- Test ---
+pytest==8.3.4
+pytest-asyncio==0.25.2
+pytest-cov==6.0.0
+httpx==0.28.1

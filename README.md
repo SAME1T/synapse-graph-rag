@@ -1,0 +1,1 @@
+# Synapse — Local GraphRAG Engine

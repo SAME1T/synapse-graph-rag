@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+data/processed/
+data/raw_documents/
+.env
+*.db
+*.gpickle
