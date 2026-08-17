@@ -1,10 +1,14 @@
 """
-TODO: Foundry Local SDK ile yerel LLM'e bağlanan tek merkezi nokta.
-Projedeki başka hiçbir dosya foundry_local_sdk'yi doğrudan import etmez,
-hepsi bu sınıf üzerinden konuşur.
+TODO: Foundry Local SDK ile yerel LLM'lere bağlanan tek merkezi nokta.
+Farklı görevler farklı modeller kullanabilir (örn. hızlı bir model generation için,
+daha güçlü bir model yapılandırılmış çıkarım için) - bu sınıf birden fazla modeli
+aynı anda belleğe alıp alias'a göre yönetir, aynı model iki görevde de kullanılıyorsa
+gereksiz yeniden yükleme yapmaz.
 """
 
 import logging
+from typing import Dict, Optional, Tuple
+
 from foundry_local_sdk import Configuration, FoundryLocalManager
 
 from app.core.config import settings
@@ -13,80 +17,95 @@ logger = logging.getLogger(__name__)
 
 
 class LocalLLMManager:
-    """
-    Foundry Local üzerinde çalışan yerel LLM ile iletişimi yöneten sınıf.
-    Model indirme, belleğe yükleme ve cevap üretme burada toplanır.
-    """
-
-    def __init__(self, model_alias: str = settings.LLM_MODEL_ALIAS):
-        self._model_alias = model_alias
+    def __init__(self):
         self._manager = None
-        self._model = None
-        self._chat_client = None
-        self._is_ready = False
+        self._eps_registered = False
+        self._loaded_models: Dict[str, Tuple[object, object]] = {}  # alias -> (model, chat_client)
 
-    def initialize(self) -> None:
-        """
-        Foundry Local servisini başlatır, modeli indirir (yoksa) ve belleğe yükler.
-        Uygulama açılışında BİR KEZ çağrılmalı (main.py içinde bağlayacağız).
-        """
+    def _ensure_foundry_initialized(self) -> None:
+        if self._manager is not None:
+            return
         try:
             config = Configuration(app_name="synapse_graph_rag")
             FoundryLocalManager.initialize(config)
             self._manager = FoundryLocalManager.instance
-
-            logger.info("Execution provider'lar kaydediliyor...")
-            self._manager.download_and_register_eps()
-
-            logger.info(f"Model aranıyor: {self._model_alias}")
-            self._model = self._manager.catalog.get_model(self._model_alias)
-
-            logger.info("Model indiriliyor (önbellekte varsa atlanır)...")
-            self._model.download()
-
-            logger.info("Model belleğe yükleniyor...")
-            self._model.load()
-
-            self._chat_client = self._model.get_chat_client()
-            self._is_ready = True
-            logger.info(f"Model hazır: {self._model_alias}")
-
         except Exception as exc:
             logger.error(f"Foundry Local başlatılamadı: {exc}")
+            raise RuntimeError("Foundry Local servisi başlatılamadı.") from exc
+
+    def _ensure_eps_registered(self) -> None:
+        if self._eps_registered:
+            return
+        self._manager.download_and_register_eps()
+        self._eps_registered = True
+
+    def load_model(self, model_alias: str) -> None:
+        """
+        Belirtilen alias'a sahip modeli indirir (yoksa) ve belleğe yükler.
+        Model zaten yüklüyse hiçbir şey yapmaz.
+        """
+        if model_alias in self._loaded_models:
+            return
+
+        self._ensure_foundry_initialized()
+        self._ensure_eps_registered()
+
+        try:
+            logger.info(f"Model aranıyor: {model_alias}")
+            model = self._manager.catalog.get_model(model_alias)
+
+            logger.info(f"Model indiriliyor (önbellekte varsa atlanır): {model_alias}")
+            model.download()
+
+            logger.info(f"Model belleğe yükleniyor: {model_alias}")
+            model.load()
+
+            chat_client = model.get_chat_client()
+            self._loaded_models[model_alias] = (model, chat_client)
+            logger.info(f"Model hazır: {model_alias}")
+
+        except Exception as exc:
+            logger.error(f"Model yüklenemedi ({model_alias}): {exc}")
             raise RuntimeError(
-                f"Yerel LLM başlatılamadı. Foundry Local servisinin çalıştığından "
-                f"ve '{self._model_alias}' modelinin kurulu olduğundan emin olun."
+                f"'{model_alias}' modeli yüklenemedi. Foundry Local servisinin "
+                f"çalıştığından ve modelin kurulu olduğundan emin olun."
             ) from exc
 
-    def generate(self, system_prompt: str, user_prompt: str) -> str:
+    def generate(
+        self, system_prompt: str, user_prompt: str, model_alias: Optional[str] = None
+    ) -> str:
         """
-        Verilen system prompt + kullanıcı mesajına göre tek seferlik bir cevap üretir.
-        RAG cevaplarını üretirken bunu kullanacağız.
+        Belirtilen (veya varsayılan generation) modelle tek seferlik bir cevap üretir.
+        Model henüz yüklü değilse otomatik olarak yükler (lazy loading) -
+        böylece extraction modeli sadece ilk kullanıldığında indirilir.
         """
-        if not self._is_ready:
-            raise RuntimeError("LLM henüz başlatılmadı. Önce initialize() çağrılmalı.")
+        alias = model_alias or settings.LLM_MODEL_ALIAS
 
+        if alias not in self._loaded_models:
+            self.load_model(alias)
+
+        _, chat_client = self._loaded_models[alias]
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
 
         try:
-            response = self._chat_client.complete_chat(messages)
+            response = chat_client.complete_chat(messages)
             return response.choices[0].message.content
         except Exception as exc:
-            logger.error(f"Cevap üretilirken hata oluştu: {exc}")
+            logger.error(f"Cevap üretilirken hata oluştu ({alias}): {exc}")
             raise RuntimeError("Yerel model cevap üretemedi.") from exc
 
     def shutdown(self) -> None:
-        """
-        Uygulama kapanırken modeli bellekten kaldırır.
-        """
-        if self._model and self._is_ready:
-            self._model.unload()
-            self._is_ready = False
-            logger.info("Model bellekten kaldırıldı.")
+        """Yüklü tüm modelleri bellekten kaldırır."""
+        for alias, (model, _) in list(self._loaded_models.items()):
+            try:
+                model.unload()
+                logger.info(f"Model bellekten kaldırıldı: {alias}")
+            except Exception as exc:
+                logger.warning(f"Model kaldırılırken hata oluştu ({alias}): {exc}")
+        self._loaded_models.clear()
 
 
-# Tüm uygulamanın kullanacağı tek nesne (basit bir singleton mantığı)
 llm_manager = LocalLLMManager()

@@ -31,11 +31,15 @@ class Settings(BaseSettings):
     EMBEDDING_DIMENSION: int = 1024
 
     # --- Yerel LLM (Foundry Local üzerinden çalışan model) ---
-    LLM_MODEL_ALIAS: str = "qwen2.5-3b-instruct"
+    LLM_MODEL_ALIAS: str = "qwen3.5-2b-text"
+    EXTRACTION_MODEL_ALIAS: str = "phi-4-mini"
 
     # --- Retrieval (bilgi getirme) Ayarları ---
     TOP_K: int = 4                     # kaç parça getirileceği
     MIN_RETRIEVAL_SCORE: float = 0.55  # bu skorun altındaki sonuçlar "yetersiz kaynak" sayılır
+    RERANKER_MODEL_NAME: str = "cross-encoder/mmarco-mMiniLMv2-L12-H384-v1"
+    MIN_RERANK_SCORE: float = 0.3
+    RERANK_CANDIDATE_POOL: int = 10  # bi-encoder'dan kaç aday alınıp reranker'a verilecek
 
     # --- API ---
     API_V1_PREFIX: str = "/api/v1"
