@@ -251,5 +251,36 @@ class GraphRepository:
         ]
         return {"nodes": nodes, "edges": edges}
 
+    def remove_document(self, document_id: str) -> None:
+        """
+        Bir dokümana ait kenarları (ilişkileri) siler. Bir düğüm (varlık) hiçbir
+        dokümana bağlı kalmıyorsa VE hiçbir kenarı yoksa (yetim kaldıysa) o düğümü
+        de siler. Başka dokümanlardan da beslenen varlıklar korunur.
+        """
+        self._ensure_loaded()
+
+        edges_to_remove = [
+            (u, v, k) for u, v, k, data in self._graph.edges(keys=True, data=True)
+            if data.get("document_id") == document_id
+        ]
+        for u, v, k in edges_to_remove:
+            self._graph.remove_edge(u, v, key=k)
+
+        nodes_to_remove = []
+        for node_id, data in self._graph.nodes(data=True):
+            doc_ids = data.get("document_ids", set())
+            doc_ids.discard(document_id)
+            if not doc_ids and self._graph.degree(node_id) == 0:
+                nodes_to_remove.append(node_id)
+
+        for node_id in nodes_to_remove:
+            self._graph.remove_node(node_id)
+
+        self._save()
+        logger.info(
+            f"Graf temizlendi: {len(edges_to_remove)} kenar, "
+            f"{len(nodes_to_remove)} yetim düğüm silindi (doküman: {document_id})."
+        )
+
 
 graph_repository = GraphRepository()

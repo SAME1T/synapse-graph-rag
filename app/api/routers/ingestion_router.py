@@ -81,3 +81,12 @@ async def list_documents():
     return DocumentListResponse(
         documents=[DocumentStatusResponse(**doc) for doc in documents], total=len(documents)
     )
+
+
+@router.delete("/{document_id}")
+async def delete_document(document_id: str):
+    """Bir dokümanı ve ona ait tüm vektör/graf verisini kalıcı olarak siler."""
+    deleted = ingestion_service.delete_document(document_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Doküman bulunamadı.")
+    return {"message": "Doküman silindi.", "document_id": document_id}

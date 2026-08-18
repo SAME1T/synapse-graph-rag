@@ -1,6 +1,15 @@
 """
 TODO: Retrieval ile bulunan chunk'ları VE graf ilişkilerini context olarak kullanıp
-LLM'den cevap üreten servis. RAG'in "Generation" kısmı.
+LLM'den cevap üreten servis. RAG'in "Generation" kısmı. İki katmanlı groundedness
+kontrolü içerir:
+(1) Kaynak yoksa LLM hiç çağrılmaz.
+(2) LLM cevap üretse bile, cevabın kaynaklarla örtüşmesi (answer_quality.py) kontrol
+    edilir - düşük örtüşme varsa cevap gösterilmez, güvenli bir fallback'e düşülür.
+
+is_fallback alanı: "used_llm" tek başına yanıltıcı olabiliyordu, çünkü LLM çağrılıp
+kalite kontrolünden geçemeyen bir cevap da used_llm=True dönüyordu - arayüz bunu
+"gerçek bir cevap" gibi gösterebiliyordu. is_fallback, kullanıcıya gösterilen
+metnin bir ret/fallback mesajı mı yoksa gerçek bir cevap mı olduğunu net ayırır.
 """
 
 import logging
@@ -32,6 +41,7 @@ class GenerationService:
             return {
                 "answer": NO_CONTEXT_FALLBACK_MESSAGE,
                 "used_llm": False,
+                "is_fallback": True,
                 "groundedness_score": 0.0,
                 "sources": [],
                 "graph_facts_used": [],
@@ -39,18 +49,17 @@ class GenerationService:
 
         context_texts = [c["text"] for c in retrieved_chunks]
         user_prompt = build_user_prompt(query, context_texts, graph_facts)
-        logger.info(f"LLM'e giden graf gerçekleri: {graph_facts}")
 
         try:
             raw_answer = llm_manager.generate(
                 system_prompt=RAG_SYSTEM_PROMPT, user_prompt=user_prompt
             )
-            logger.info(f"LLM ham cevabı: {raw_answer}")
         except Exception as exc:
             logger.error(f"LLM cevap üretemedi, fallback'e düşülüyor: {exc}")
             return {
                 "answer": NO_CONTEXT_FALLBACK_MESSAGE,
                 "used_llm": False,
+                "is_fallback": True,
                 "groundedness_score": 0.0,
                 "sources": [],
                 "graph_facts_used": [],
@@ -66,6 +75,7 @@ class GenerationService:
             return {
                 "answer": LOW_QUALITY_FALLBACK_MESSAGE,
                 "used_llm": True,
+                "is_fallback": True,
                 "groundedness_score": quality_result.groundedness_score,
                 "sources": [],
                 "graph_facts_used": [],
@@ -74,6 +84,7 @@ class GenerationService:
         return {
             "answer": cleaned_answer,
             "used_llm": True,
+            "is_fallback": False,
             "groundedness_score": quality_result.groundedness_score,
             "sources": [
                 {

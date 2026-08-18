@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     # --- Yerel LLM (Foundry Local üzerinden çalışan model) ---
     LLM_MODEL_ALIAS: str = "qwen3.5-2b-text"
     EXTRACTION_MODEL_ALIAS: str = "phi-4-mini"
+    GENERATION_TEMPERATURE: float = 0.3
+    GENERATION_MAX_TOKENS: int = 400
+    GENERATION_FREQUENCY_PENALTY: float = 0.4
+    EXTRACTION_TEMPERATURE: float = 0.1
+    EXTRACTION_MAX_TOKENS: int = 700
 
     # --- Retrieval (bilgi getirme) Ayarları ---
     TOP_K: int = 4                     # kaç parça getirileceği

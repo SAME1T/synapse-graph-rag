@@ -15,6 +15,7 @@ from pypdf import PdfReader
 from app.rag.chunking import chunk_text
 from app.rag.embedder import embedder
 from app.repositories.document_repository import document_repository
+from app.repositories.graph_repository import graph_repository
 from app.repositories.vector_repository import vector_repository
 from app.services.extraction_service import extraction_service
 
@@ -85,6 +86,34 @@ class IngestionService:
             return "\n".join(pages_text)
         except Exception as exc:
             raise ValueError(f"PDF okunamadı: {exc}") from exc
+
+    def delete_document(self, document_id: str) -> bool:
+        """
+        Bir dokümanı üç katmandan da (SQLite, vektör DB, graf) ve fiziksel
+        dosya sisteminden siler. Doküman bulunamazsa False döner.
+        Alt katmanlardan biri başarısız olsa bile diğerlerinin silinmesi denenir -
+        kısmi bir silme, hiç silmemekten iyidir.
+        """
+        file_path = document_repository.delete_document(document_id)
+        if file_path is None:
+            return False
+
+        try:
+            vector_repository.delete_by_document(document_id)
+        except Exception as exc:
+            logger.error(f"Vektör verisi silinirken hata oluştu: {exc}")
+
+        try:
+            graph_repository.remove_document(document_id)
+        except Exception as exc:
+            logger.error(f"Graf verisi silinirken hata oluştu: {exc}")
+
+        try:
+            Path(file_path).unlink(missing_ok=True)
+        except Exception as exc:
+            logger.error(f"Fiziksel dosya silinirken hata oluştu: {exc}")
+
+        return True
 
 
 ingestion_service = IngestionService()

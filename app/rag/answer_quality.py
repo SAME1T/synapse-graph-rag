@@ -12,12 +12,15 @@ from typing import List
 
 MIN_ANSWER_LENGTH = 15
 MIN_GROUNDEDNESS_SCORE = 0.25  # cevaptaki anlamlı kelimelerin en az %25'i kaynaklarda geçmeli
+MAX_TRIGRAM_REPETITION_RATIO = 0.25  # bir 3-kelimelik ifadenin toplam içinde tekrar oranı bu eşiği geçerse "bozuk" say
 
 REFUSAL_PHRASES = [
     "yeterli bilgi bulunmuyor",
     "yeterli bilgi yok",
     "kaynaklarda bu soruyu",
 ]
+
+PROMPT_LEAK_MARKERS = [r"\buser\b", r"KAYNAK METİNLER", r"\bSORU:\s"]
 
 
 @dataclass
@@ -32,6 +35,16 @@ def clean_answer_formatting(answer: str) -> str:
     Küçük modellerin sık ürettiği gereksiz markdown başlıklarını (**Sonuç:** gibi)
     ve fazla boş satırları temizler. İçeriği DEĞİŞTİRMEZ, sadece görünümü sadeleştirir.
     """
+    # Model bazen cevabını bitirdikten sonra kendi prompt'unu tekrar üretmeye
+    # başlıyor (bilinen bir stop-token güvenilirliği sorunu). Bu izleri kesin
+    # olarak buluyor ve gerçek cevabın bittiği yerde kesiyoruz.
+    earliest_leak_idx = len(answer)
+    for pattern in PROMPT_LEAK_MARKERS:
+        match = re.search(pattern, answer, re.IGNORECASE)
+        if match and match.start() < earliest_leak_idx:
+            earliest_leak_idx = match.start()
+    answer = answer[:earliest_leak_idx].strip()
+
     cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", answer)
     cleaned = re.sub(r"\n{3,}", "\n\n", cleaned)
     return cleaned.strip()
@@ -72,6 +85,14 @@ def check_answer_quality(answer: str, source_texts: List[str]) -> QualityCheckRe
         # Model kendisi "yeterli bilgi yok" demişse, bu bir HATA değil, doğru bir davranıştır.
         return QualityCheckResult(True, "Model bilinçli olarak bilgi yetersizliğini belirtti.", 1.0)
 
+    repetition_ratio = detect_excessive_repetition(answer)
+    if repetition_ratio > MAX_TRIGRAM_REPETITION_RATIO:
+        return QualityCheckResult(
+            False,
+            f"Cevap aşırı tekrar içeriyor (oran: {repetition_ratio:.2f}) - model tekrar döngüsüne girmiş olabilir.",
+            0.0,
+        )
+
     score = calculate_groundedness(answer, source_texts)
     if score < MIN_GROUNDEDNESS_SCORE:
         return QualityCheckResult(
@@ -81,3 +102,22 @@ def check_answer_quality(answer: str, source_texts: List[str]) -> QualityCheckRe
         )
 
     return QualityCheckResult(True, "Cevap kabul edildi.", score)
+
+
+def detect_excessive_repetition(text: str) -> float:
+    """
+    Metindeki 3 kelimelik öbeklerin (trigram) ne kadar tekrar ettiğini ölçer.
+    Yüksek oran, modelin bir tekrar döngüsüne girdiğinin (repetition loop)
+    güvenilir bir işaretidir - groundedness skoru bunu YAKALAYAMAZ, çünkü
+    tekrarlanan kelimeler kaynakla örtüşüyor olabilir.
+    """
+    words = text.lower().split()
+    if len(words) < 10:
+        return 0.0
+
+    trigrams = [" ".join(words[i:i+3]) for i in range(len(words) - 2)]
+    if not trigrams:
+        return 0.0
+
+    most_common_count = max(trigrams.count(t) for t in set(trigrams))
+    return most_common_count / len(trigrams)

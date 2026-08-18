@@ -121,6 +121,16 @@ class VectorRepository:
         self._ensure_connected()
         return self._collection.count()
 
+    def delete_by_document(self, document_id: str) -> None:
+        """Bir dokümana ait tüm chunk'ları vektör veritabanından siler."""
+        self._ensure_connected()
+        try:
+            self._collection.delete(where={"document_id": document_id})
+            logger.info(f"Doküman için chunk'lar vektör DB'den silindi: {document_id}")
+        except Exception as exc:
+            logger.error(f"Chunk silinirken hata oluştu: {exc}")
+            raise RuntimeError("Chunk'lar silinemedi.") from exc
+
 
 # Tüm uygulamanın kullanacağı tek nesne
 vector_repository = VectorRepository()

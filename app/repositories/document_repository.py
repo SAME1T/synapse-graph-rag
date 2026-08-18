@@ -142,6 +142,26 @@ class DocumentRepository:
             ).fetchall()
             return [dict(row) for row in rows]
 
+    def delete_document(self, document_id: str) -> Optional[str]:
+        """
+        Doküman kaydını SQLite'tan siler. Doküman bulunursa dosya yolunu (file_path)
+        döner ki çağıran taraf fiziksel dosyayı da silebilsin. Bulunamazsa None döner.
+        """
+        self._ensure_schema()
+        document = self.get_document(document_id)
+        if document is None:
+            return None
+
+        try:
+            with self._get_connection() as conn:
+                conn.execute("DELETE FROM documents WHERE id = ?", (document_id,))
+            logger.info(f"Doküman kaydı silindi: {document_id}")
+        except Exception as exc:
+            logger.error(f"Doküman kaydı silinemedi: {exc}")
+            raise RuntimeError("Doküman kaydı silinemedi.") from exc
+
+        return document["file_path"]
+
 
 # Tüm uygulamanın kullanacağı tek nesne
 document_repository = DocumentRepository()

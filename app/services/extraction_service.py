@@ -61,6 +61,7 @@ class ExtractionService:
             "entity_mentions": entity_mentions,
             "relationship_mentions": relationship_mentions,
             "failed_chunks": failed_chunks,
+            "discarded_extractions": discarded_extractions,
         }
 
 

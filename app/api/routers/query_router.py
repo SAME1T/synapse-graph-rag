@@ -72,7 +72,9 @@ async def ask_question(request: AskRequest):
         query=request.query,
         answer=result["answer"],
         used_llm=result["used_llm"],
+        is_fallback=result["is_fallback"],
         groundedness_score=result["groundedness_score"],
         sources=[SourceReference(**s) for s in result["sources"]],
         graph_facts_used=[GraphFactReference(**f) for f in result["graph_facts_used"]],
     )
+    

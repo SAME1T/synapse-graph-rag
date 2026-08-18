@@ -38,7 +38,17 @@ async def lifespan(app: FastAPI):
 
     try:
         logger.info("Yerel LLM (Foundry Local) başlatılıyor...")
-        llm_manager.load_model(settings.LLM_MODEL_ALIAS)
+        llm_manager.load_model(
+            settings.LLM_MODEL_ALIAS,
+            temperature=settings.GENERATION_TEMPERATURE,
+            max_tokens=settings.GENERATION_MAX_TOKENS,
+            frequency_penalty=settings.GENERATION_FREQUENCY_PENALTY,
+        )
+        llm_manager.load_model(
+            settings.EXTRACTION_MODEL_ALIAS,
+            temperature=settings.EXTRACTION_TEMPERATURE,
+            max_tokens=settings.EXTRACTION_MAX_TOKENS,
+        )
     except Exception as exc:
         logger.warning(
             f"Yerel LLM başlatılamadı, LLM gerektiren endpoint'ler şimdilik çalışmayacak: {exc}"

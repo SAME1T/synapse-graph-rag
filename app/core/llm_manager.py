@@ -39,10 +39,19 @@ class LocalLLMManager:
         self._manager.download_and_register_eps()
         self._eps_registered = True
 
-    def load_model(self, model_alias: str) -> None:
+    def load_model(
+        self,
+        model_alias: str,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        frequency_penalty: float | None = None,
+    ) -> None:
         """
         Belirtilen alias'a sahip modeli indirir (yoksa) ve belleğe yükler.
-        Model zaten yüklüyse hiçbir şey yapmaz.
+        temperature/max_tokens/frequency_penalty verilirse, üretim davranışını
+        sınırlamak için client.settings üzerine uygulanır - ÖZELLİKLE max_tokens
+        önemli, çünkü onsuz model bazen tekrar döngüsüne girip sınırsız üretime
+        devam edebiliyor (gerçek bir dokümanla test ederken gözlemlendi).
         """
         if model_alias in self._loaded_models:
             return
@@ -61,8 +70,22 @@ class LocalLLMManager:
             model.load()
 
             chat_client = model.get_chat_client()
+
+            if temperature is not None and hasattr(chat_client, "settings"):
+                chat_client.settings.temperature = temperature
+            if max_tokens is not None and hasattr(chat_client, "settings"):
+                chat_client.settings.max_tokens = max_tokens
+            if frequency_penalty is not None and hasattr(chat_client.settings, "frequency_penalty"):
+                chat_client.settings.frequency_penalty = frequency_penalty
+
+            if hasattr(chat_client.settings, "stop"):
+                chat_client.settings.stop = ["\nuser", "user\n", "KAYNAK METİNLER"]
+
             self._loaded_models[model_alias] = (model, chat_client)
-            logger.info(f"Model hazır: {model_alias}")
+            logger.info(
+                f"Model hazır: {model_alias} "
+                f"(temperature={temperature}, max_tokens={max_tokens}, frequency_penalty={frequency_penalty})"
+            )
 
         except Exception as exc:
             logger.error(f"Model yüklenemedi ({model_alias}): {exc}")

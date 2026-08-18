@@ -47,6 +47,7 @@ class AskResponse(BaseModel):
     query: str
     answer: str
     used_llm: bool
+    is_fallback: bool
     groundedness_score: float
     sources: List[SourceReference]
     graph_facts_used: List[GraphFactReference]
