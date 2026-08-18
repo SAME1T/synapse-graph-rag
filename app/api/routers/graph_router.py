@@ -6,7 +6,11 @@ import logging
 
 from fastapi import APIRouter
 
-from app.api.schemas.graph_schemas import EntityNeighborsResponse, GraphStatsResponse
+from app.api.schemas.graph_schemas import (
+    EntityNeighborsResponse,
+    GraphDumpResponse,
+    GraphStatsResponse,
+)
 from app.repositories.graph_repository import graph_repository
 
 logger = logging.getLogger(__name__)
@@ -32,3 +36,10 @@ async def get_entity_neighbors(entity_name: str, depth: int = 1):
     return EntityNeighborsResponse(
         entity=entity_name, neighbors=neighbors, direct_relationships=relationships
     )
+
+
+@router.get("/dump", response_model=GraphDumpResponse)
+async def dump_graph():
+    """Debug: graftaki tüm düğüm ve kenarları döner - node kopukluğu/normalizasyon sorunlarını görmek için."""
+    data = graph_repository.dump_all()
+    return GraphDumpResponse(**data)

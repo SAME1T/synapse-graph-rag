@@ -159,6 +159,50 @@ class GraphRepository:
             )
         return relationships
 
+    def find_path_between(self, entity_a: str, entity_b: str, max_depth: int = 3) -> List[dict]:
+        """
+        İki varlık arasındaki EN KISA bağlantı zincirini bulur (yön önemsemeden).
+        "X ile Y arasındaki bağlantı nedir" sorularının doğru cevabı budur - her iki
+        varlığın kendi ilişkilerini ayrı ayrı listelemek yerine, aralarındaki gerçek
+        zinciri (varsa bir ara varlık üzerinden) tek, bağlantılı bir yapı olarak döner.
+        """
+        self._ensure_loaded()
+        node_a = self._normalize(entity_a)
+        node_b = self._normalize(entity_b)
+
+        if not self._graph.has_node(node_a) or not self._graph.has_node(node_b):
+            return []
+
+        undirected_view = self._graph.to_undirected(as_view=True)
+        try:
+            path_nodes = nx.shortest_path(undirected_view, node_a, node_b)
+        except nx.NetworkXNoPath:
+            return []
+
+        if len(path_nodes) - 1 > max_depth:
+            return []
+
+        path_facts = []
+        for i in range(len(path_nodes) - 1):
+            source, target = path_nodes[i], path_nodes[i + 1]
+            if self._graph.has_edge(source, target):
+                edge_data = list(self._graph.get_edge_data(source, target).values())[0]
+                subject_display = self._graph.nodes[source]["display_name"]
+                object_display = self._graph.nodes[target]["display_name"]
+            else:
+                edge_data = list(self._graph.get_edge_data(target, source).values())[0]
+                subject_display = self._graph.nodes[target]["display_name"]
+                object_display = self._graph.nodes[source]["display_name"]
+
+            path_facts.append(
+                {
+                    "subject": subject_display,
+                    "predicate": edge_data.get("predicate", ""),
+                    "object": object_display,
+                }
+            )
+        return path_facts
+
     def find_entities_by_name(self, query: str) -> List[dict]:
         """
         Kullanıcı sorusundaki kelimelerin graftaki hangi varlıklara denk geldiğini
@@ -182,6 +226,30 @@ class GraphRepository:
     def count_relationships(self) -> int:
         self._ensure_loaded()
         return self._graph.number_of_edges()
+
+    def dump_all(self) -> dict:
+        """
+        Debug amaçlı: graftaki TÜM düğümleri ve TÜM kenarları döner.
+        Coreference/normalizasyon sorunlarını teşhis etmek için kullanılır.
+        """
+        self._ensure_loaded()
+        nodes = [
+            {
+                "id": node_id,
+                "display_name": data.get("display_name", node_id),
+                "type": data.get("type", "unknown"),
+            }
+            for node_id, data in self._graph.nodes(data=True)
+        ]
+        edges = [
+            {
+                "subject": self._graph.nodes[u]["display_name"],
+                "predicate": data.get("predicate", ""),
+                "object": self._graph.nodes[v]["display_name"],
+            }
+            for u, v, data in self._graph.edges(data=True)
+        ]
+        return {"nodes": nodes, "edges": edges}
 
 
 graph_repository = GraphRepository()

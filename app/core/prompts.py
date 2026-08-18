@@ -51,19 +51,30 @@ GRAPH_EXTRACTION_SYSTEM_PROMPT = """Sen metinlerden varlık (entity) ve ilişki 
 
 GÖREV: Verilen metindeki ÖNEMLİ varlıkları (kişi, kavram, organizasyon, ürün, yer vb.) ve bunlar arasındaki İLİŞKİLERİ tespit et.
 
-KURALLAR:
-1. SADECE metinde açıkça geçen bilgileri kullan, hiçbir şey uydurma.
-2. Cevabını SADECE aşağıdaki JSON formatında ver, başka hiçbir açıklama ekleme:
+ÖNEMLİ UYARI - ÖZNE TESPİTİ: Türkçe cümlelerde özne bazen cümlenin SONUNDA yer alır (devrik cümle).
+Örneğin "X'ten Y sorumludur" kalıbında GERÇEK ÖZNE "Y"dir, "X" değildir - çünkü sorumlu olan Y'dir.
+Her ilişkide "kim/ne, [fiil] kime/neye" mantığını dikkatlice kur, cümledeki kelime SIRASINA değil ANLAMINA bak.
 
+ÖRNEK:
+Metin: "Ali Veli, İnovasyon A.Ş.'de çalışmaktadır. Şirketin pazarlama biriminden Selin Kara sorumludur."
+Doğru çıktı:
 {
   "entities": [
-    {"name": "varlık adı", "type": "kavram|kişi|organizasyon|yer|ürün"}
+    {"name": "Ali Veli", "type": "kişi"},
+    {"name": "İnovasyon A.Ş.", "type": "organizasyon"},
+    {"name": "Selin Kara", "type": "kişi"},
+    {"name": "Pazarlama Birimi", "type": "kavram"}
   ],
   "relationships": [
-    {"subject": "varlık1", "predicate": "ilişki türü", "object": "varlık2"}
+    {"subject": "Ali Veli", "predicate": "çalışmaktadır", "object": "İnovasyon A.Ş."},
+    {"subject": "Selin Kara", "predicate": "sorumludur", "object": "Pazarlama Birimi"}
   ]
 }
+Dikkat: "Selin Kara" cümlede sonda geçmesine rağmen ilişkide ÖZNE odur, "Pazarlama Birimi" değildir.
 
+KURALLAR:
+1. SADECE metinde açıkça geçen bilgileri kullan, hiçbir şey uydurma.
+2. Cevabını SADECE JSON formatında ver, başka hiçbir açıklama ekleme.
 3. Metinde hiçbir belirgin varlık/ilişki yoksa, boş listelerle dön: {"entities": [], "relationships": []}
 4. JSON dışında HİÇBİR metin yazma - açıklama, giriş cümlesi, yorum ekleme."""
 

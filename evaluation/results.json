@@ -1,0 +1,152 @@
+[
+  {
+    "id": "q1",
+    "category": "factual",
+    "question": "Çanakkale Savaşı hangi yıllar arasında gerçekleşti?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.8571428571428571,
+    "keyword_hit": true,
+    "answer_preview": "Çanakkale Savaşı 1915-1916 yılları arasında gerçekleşti."
+  },
+  {
+    "id": "q2",
+    "category": "factual",
+    "question": "İtilaf Devletleri'nin boğazı geçme planının mimarlarından biri kimdir?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.3828125,
+    "keyword_hit": true,
+    "answer_preview": "İtilaf Devletleri'nin boğazı geçme planının mimarlarından biri Winston Churchill'di.\n\nKaynak 1'e göre Winston Churchill, dönemin İngiliz Deniz Bakanlı"
+  },
+  {
+    "id": "q3",
+    "category": "factual",
+    "question": "18 Mart 1915'teki deniz saldırısında hangi gemi mayın döşedi?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.25609756097560976,
+    "keyword_hit": true,
+    "answer_preview": "18 Mart 1915'te Türkiye'ye karşı verilen Deniz ve Kaldırsal Çakışma'ya (Gelibolu Savaşı) başlamadan önce Osmanlı ordunun bir mayın hattı döşemesi yapm"
+  },
+  {
+    "id": "q4",
+    "category": "factual",
+    "question": "Mustafa Kemal hangi tümenin komutanıydı?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.3310344827586207,
+    "keyword_hit": true,
+    "answer_preview": "Mustafa Kemal, 19. Tümen Komutanı olarak görev yapmıştı. Bu ilanı gösteren verimlere göre, 18 Mart 1915'te İngiliz, Fransız ve Anzak (Avustralya ve Ye"
+  },
+  {
+    "id": "q5",
+    "category": "factual",
+    "question": "Anzak kısaltması hangi ülkelerin ordularını temsil eder?",
+    "passed": false,
+    "used_llm": false,
+    "groundedness_score": 0.0,
+    "keyword_hit": false,
+    "answer_preview": "Bu soruyu yanıtlamak için yüklü dokümanlarda yeterli ilgili bilgi bulamadım. Farklı bir soru sorabilir ya da ilgili bir doküman yükleyebilirsin."
+  },
+  {
+    "id": "q6",
+    "category": "factual",
+    "question": "Osmanlı ordusunun genel stratejisinden sorumlu Alman general kimdir?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.5428571428571428,
+    "keyword_hit": true,
+    "answer_preview": "Mustafa Kemal'in \"Size taarruzu değil, ölmeyi emrediyorum\" sözü, Osmanlı ordusunun genel stratejisinden sorumluydu. Son olarak İtilaf Devletleri, ceph"
+  },
+  {
+    "id": "q7",
+    "category": "factual",
+    "question": "İtilaf Devletleri birliklerini hangi tarihlerde geri çekti?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.4129032258064516,
+    "keyword_hit": true,
+    "answer_preview": "İtilaf Devletleri birliklerini Aralık 1915 ile Ocak 1916 arası dönemde geri çekti. Bir sonraki haftalık tarih aralığında ise savaşın en başarılı organ"
+  },
+  {
+    "id": "q8",
+    "category": "factual",
+    "question": "Anafartalar'daki yeni çıkarmayı kim durdurdu?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.4647887323943662,
+    "keyword_hit": true,
+    "answer_preview": "Anafartalar'daki yeni çıkarmayı Mustafa Kemal'in emrindeki Osmanlı birlikleri tarafından durduruldu.\n\nBu kararlılığın önemli bir simgesi olması, Musta"
+  },
+  {
+    "id": "q9",
+    "category": "factual",
+    "question": "Çanakkale Savaşı, Anzak birlikleri için tarihsel olarak neyin dönüm noktası kabul edilir?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.5263157894736842,
+    "keyword_hit": true,
+    "answer_preview": "Çanakkale Savaşı, Anzak birlikleri için ulusal kimliklerinin şekillenmesinde tarihi bir dönüm noktası kabul edilir. Kaynak 1 bu ifadeyi doğrudan belir"
+  },
+  {
+    "id": "q10",
+    "category": "factual",
+    "question": "Winston Churchill dönemin hangi göreve sahipti?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.8571428571428571,
+    "keyword_hit": true,
+    "answer_preview": "Winston Churchill dönemin İngiliz Deniz Bakanlığı yetkilisiydi."
+  },
+  {
+    "id": "q11",
+    "category": "out_of_domain",
+    "question": "Bileşik faiz nedir?",
+    "passed": true,
+    "used_llm": false,
+    "groundedness_score": 0.0,
+    "keyword_hit": false,
+    "answer_preview": "Bu soruyu yanıtlamak için yüklü dokümanlarda yeterli ilgili bilgi bulamadım. Farklı bir soru sorabilir ya da ilgili bir doküman yükleyebilirsin."
+  },
+  {
+    "id": "q12",
+    "category": "out_of_domain",
+    "question": "Python programlama dilinin avantajları nelerdir?",
+    "passed": true,
+    "used_llm": false,
+    "groundedness_score": 0.0,
+    "keyword_hit": false,
+    "answer_preview": "Bu soruyu yanıtlamak için yüklü dokümanlarda yeterli ilgili bilgi bulamadım. Farklı bir soru sorabilir ya da ilgili bir doküman yükleyebilirsin."
+  },
+  {
+    "id": "q13",
+    "category": "out_of_domain",
+    "question": "Mars'ta hayat var mı?",
+    "passed": true,
+    "used_llm": false,
+    "groundedness_score": 0.0,
+    "keyword_hit": false,
+    "answer_preview": "Bu soruyu yanıtlamak için yüklü dokümanlarda yeterli ilgili bilgi bulamadım. Farklı bir soru sorabilir ya da ilgili bir doküman yükleyebilirsin."
+  },
+  {
+    "id": "q14",
+    "category": "graph",
+    "question": "Mustafa Kemal ile Liman von Sanders arasındaki bağlantı nedir?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.359375,
+    "keyword_hit": true,
+    "answer_preview": "Mustafa Kemal ve Liman von Sanders arasındaki temel ilişki cephenin genel stratejisinden sorumluluk üzerine kuruludur.\n\nKaynak 1'e göre, Osmanlı ordus"
+  },
+  {
+    "id": "q15",
+    "category": "graph",
+    "question": "Winston Churchill ile Mustafa Kemal arasında bir ilişki var mı?",
+    "passed": true,
+    "used_llm": true,
+    "groundedness_score": 0.15,
+    "keyword_hit": false,
+    "answer_preview": "Model bu soruyu yanıtlamayı denedi, ancak cevabın kaynaklardaki bilgilerle yeterince örtüşmediği tespit edildi. Güvenilir olmayan bir cevap göstermek "
+  }
+]

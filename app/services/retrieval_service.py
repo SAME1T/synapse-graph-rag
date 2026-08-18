@@ -56,13 +56,28 @@ class RetrievalService:
 
     def retrieve_graph_facts(self, query: str) -> List[dict]:
         """
-        Sorgu metninde geçen varlıkları graf üzerinde arar, bulunan varlıkların
-        doğrudan ilişkilerini döner. Vektör aramanın yakalayamadığı ilişkisel
-        bilgi burada devreye giriyor.
+        Sorguda birden fazla varlık birlikte geçiyorsa, önce aralarındaki DOĞRUDAN
+        BAĞLANTI ZİNCİRİNİ arar (find_path_between) - "X ile Y arasında ne var" gibi
+        sorular için bu, her varlığın ilişkilerini ayrı ayrı dökmekten çok daha isabetli.
+        Yol bulunamazsa (ya da tek varlık eşleşirse) eski davranışa döner: her varlığın
+        kendi doğrudan ilişkilerini listeler.
         """
         matched_entities = graph_repository.find_entities_by_name(query)
         if not matched_entities:
             return []
+
+        entity_names = [m["entity"] for m in matched_entities]
+
+        path_facts: List[dict] = []
+        if len(entity_names) >= 2:
+            for i in range(len(entity_names)):
+                for j in range(i + 1, len(entity_names)):
+                    path = graph_repository.find_path_between(entity_names[i], entity_names[j])
+                    path_facts.extend(path)
+
+        logger.info(f"Eşleşen varlıklar: {entity_names} | Bulunan yol: {path_facts}")
+        if path_facts:
+            return self._dedupe_facts(path_facts)
 
         seen = set()
         graph_facts = []
@@ -75,6 +90,18 @@ class RetrievalService:
                 seen.add(key)
                 graph_facts.append(rel)
         return graph_facts
+
+    @staticmethod
+    def _dedupe_facts(facts: List[dict]) -> List[dict]:
+        seen = set()
+        deduped = []
+        for f in facts:
+            key = (f["subject"], f["predicate"], f["object"])
+            if key in seen:
+                continue
+            seen.add(key)
+            deduped.append(f)
+        return deduped
 
 
 retrieval_service = RetrievalService()

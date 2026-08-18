@@ -21,6 +21,7 @@ class ExtractionService:
         entity_mentions = 0
         relationship_mentions = 0
         failed_chunks = 0
+        discarded_extractions = 0
 
         for chunk in chunks:
             try:
@@ -46,12 +47,14 @@ class ExtractionService:
                 )
                 relationship_mentions += 1
 
+            discarded_extractions += result.discarded_count
+
         graph_repository.commit()
 
         logger.info(
             f"Graf çıkarımı tamamlandı: {entity_mentions} varlık bahsi, "
-            f"{relationship_mentions} ilişki bahsi, {failed_chunks} başarısız chunk "
-            f"(doküman: {document_id})."
+            f"{relationship_mentions} ilişki bahsi, {failed_chunks} başarısız chunk, "
+            f"{discarded_extractions} geçersiz (elenen) öğe (doküman: {document_id})."
         )
 
         return {

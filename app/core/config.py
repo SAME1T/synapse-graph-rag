@@ -43,6 +43,7 @@ class Settings(BaseSettings):
 
     # --- API ---
     API_V1_PREFIX: str = "/api/v1"
+    EVALUATION_API_BASE_URL: str = "http://127.0.0.1:8000"
 
 
 # Tek bir "settings" nesnesi oluşturuyoruz, diğer dosyalar bunu import edip kullanacak

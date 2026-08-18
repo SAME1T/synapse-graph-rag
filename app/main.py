@@ -7,6 +7,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routers import graph_router, ingestion_router, query_router
 from app.core.config import settings
@@ -65,3 +66,6 @@ app.include_router(graph_router.router, prefix=settings.API_V1_PREFIX)
 async def health_check():
     """Basit ayakta mıyım kontrolü - manuel test ve ileride izleme için kullanılır."""
     return {"status": "ok", "project": settings.PROJECT_NAME}
+
+
+app.mount("/", StaticFiles(directory="static", html=True), name="static")

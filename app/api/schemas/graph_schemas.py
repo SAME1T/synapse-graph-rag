@@ -28,3 +28,20 @@ class EntityNeighborsResponse(BaseModel):
     entity: str
     neighbors: List[NeighborEntity]
     direct_relationships: List[EntityRelationship]
+
+
+class GraphNode(BaseModel):
+    id: str
+    display_name: str
+    type: str
+
+
+class GraphEdge(BaseModel):
+    subject: str
+    predicate: str
+    object: str
+
+
+class GraphDumpResponse(BaseModel):
+    nodes: List[GraphNode]
+    edges: List[GraphEdge]

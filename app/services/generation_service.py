@@ -39,11 +39,13 @@ class GenerationService:
 
         context_texts = [c["text"] for c in retrieved_chunks]
         user_prompt = build_user_prompt(query, context_texts, graph_facts)
+        logger.info(f"LLM'e giden graf gerçekleri: {graph_facts}")
 
         try:
             raw_answer = llm_manager.generate(
                 system_prompt=RAG_SYSTEM_PROMPT, user_prompt=user_prompt
             )
+            logger.info(f"LLM ham cevabı: {raw_answer}")
         except Exception as exc:
             logger.error(f"LLM cevap üretemedi, fallback'e düşülüyor: {exc}")
             return {

@@ -1,1 +1,135 @@
-[]
+[
+  {
+    "id": "q1",
+    "category": "factual",
+    "question": "Çanakkale Savaşı hangi yıllar arasında gerçekleşti?",
+    "expected_keywords": [
+      "1915",
+      "1916"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q2",
+    "category": "factual",
+    "question": "İtilaf Devletleri'nin boğazı geçme planının mimarlarından biri kimdir?",
+    "expected_keywords": [
+      "Churchill"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q3",
+    "category": "factual",
+    "question": "18 Mart 1915'teki deniz saldırısında hangi gemi mayın döşedi?",
+    "expected_keywords": [
+      "Nusret"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q4",
+    "category": "factual",
+    "question": "Mustafa Kemal hangi tümenin komutanıydı?",
+    "expected_keywords": [
+      "19"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q5",
+    "category": "factual",
+    "question": "Anzak kısaltması hangi ülkelerin ordularını temsil eder?",
+    "expected_keywords": [
+      "Avustralya",
+      "Zelanda"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q6",
+    "category": "factual",
+    "question": "Osmanlı ordusunun genel stratejisinden sorumlu Alman general kimdir?",
+    "expected_keywords": [
+      "Sanders"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q7",
+    "category": "factual",
+    "question": "İtilaf Devletleri birliklerini hangi tarihlerde geri çekti?",
+    "expected_keywords": [
+      "Aralık",
+      "Ocak"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q8",
+    "category": "factual",
+    "question": "Anafartalar'daki yeni çıkarmayı kim durdurdu?",
+    "expected_keywords": [
+      "Mustafa Kemal",
+      "Kemal"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q9",
+    "category": "factual",
+    "question": "Çanakkale Savaşı, Anzak birlikleri için tarihsel olarak neyin dönüm noktası kabul edilir?",
+    "expected_keywords": [
+      "ulusal kimlik"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q10",
+    "category": "factual",
+    "question": "Winston Churchill dönemin hangi göreve sahipti?",
+    "expected_keywords": [
+      "Deniz Bakanlığı",
+      "Bakanlığı"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q11",
+    "category": "out_of_domain",
+    "question": "Bileşik faiz nedir?",
+    "expected_keywords": [],
+    "should_have_answer": false
+  },
+  {
+    "id": "q12",
+    "category": "out_of_domain",
+    "question": "Python programlama dilinin avantajları nelerdir?",
+    "expected_keywords": [],
+    "should_have_answer": false
+  },
+  {
+    "id": "q13",
+    "category": "out_of_domain",
+    "question": "Mars'ta hayat var mı?",
+    "expected_keywords": [],
+    "should_have_answer": false
+  },
+  {
+    "id": "q14",
+    "category": "graph",
+    "question": "Mustafa Kemal ile Liman von Sanders arasındaki bağlantı nedir?",
+    "expected_keywords": [
+      "Sanders",
+      "Kemal"
+    ],
+    "should_have_answer": true
+  },
+  {
+    "id": "q15",
+    "category": "graph",
+    "question": "Winston Churchill ile Mustafa Kemal arasında bir ilişki var mı?",
+    "expected_keywords": [],
+    "should_have_answer": false
+  }
+]
